@@ -1,0 +1,9 @@
+[package]
+name = "kzg_verifier"
+type = "lib"
+authors = [""]
+compiler_version = ">=0.19.2"
+
+[dependencies]
+bls12_381_fe = { path = "../noir-bls12_381_fe" }
+bls12_381_curve = { path = "../noir-bls-sig" }
