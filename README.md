@@ -3,5 +3,5 @@
 #### Installation
 
 ```Rust
-    kzg_verifier = { tag = "v0.1.0", git = "https://github.com/RajeshRk18/Kzg-Verifier.git" }
+    kzg_verifier = { tag = "v0.1.0", git = "https://github.com/RajeshRk18/kzg-verifier.git" }
 ```
