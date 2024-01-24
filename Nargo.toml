@@ -1,8 +1,8 @@
 [package]
 name = "kzg_verifier"
 type = "lib"
-authors = [""]
-compiler_version = ">=0.19.2"
+authors = ["Rajesh Kanna"]
+compiler_version = ">=0.22.0"
 
 [dependencies]
 bls12_381_fe = { tag = "v0.1.0", git = "https://github.com/RajeshRk18/noir-bls12_381_fe" }
