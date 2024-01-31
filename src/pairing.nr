@@ -6,6 +6,7 @@ use dep::bls12_381::curve::pairing::{pair, final_exponentiation, miller_loop};
 use dep::bls12_381::curve::{bls12_381, bls12_381_g2, BLS12_381, BLS12_381G2 };
 use dep::std;
 
+// f: G_1 -> x * G_1
 fn g1_scalar_mul(point: G1Point, scalar: PrimeField) -> G1Point {
     let BLS12_381 { curve } = bls12_381();
 
@@ -21,6 +22,7 @@ fn g1_scalar_mul(point: G1Point, scalar: PrimeField) -> G1Point {
     res
 }
 
+// f: G_2 -> x * G_2
 fn g2_scalar_mul(point: G2Point, scalar: PrimeField) -> G2Point {
     let BLS12_381G2 { curve } = bls12_381_g2();
 
@@ -36,18 +38,21 @@ fn g2_scalar_mul(point: G2Point, scalar: PrimeField) -> G2Point {
     res
 }
 
+// f: (G_1, G_1) -> G_1 + G_1
 fn g1_add(point1: G1Point, point2: G1Point) -> G1Point {
     let BLS12_381 { curve } = bls12_381();
 
     curve.add(point1, point2)
 }
 
+// f: (G_2, G_2) -> G_2 + G_2
 fn g2_add(point1: G2Point, point2: G2Point) -> G2Point {
     let BLS12_381G2 { curve } = bls12_381_g2();
 
     curve.add(point1, point2)
 }
 
+// computes pairing with 2 pairs. 
 fn compute_pairing(pair1: (G1Point, G2Point), pair2: (G1Point, G2Point)) -> Fp12 {
     let pair1_miller = miller_loop(pair1.1, pair1.0);
     let pair2_miller = miller_loop(pair2.1, pair2.0);

@@ -40,6 +40,7 @@ impl Polynomial {
         Polynomial::new()
     }
 
+    // creates a new monomial of given degree
     pub fn new_monomial(coeff: PrimeField, degree: Field) -> Self {
         let mut padded_coeffs = Vec::new();
 
@@ -52,24 +53,29 @@ impl Polynomial {
         Polynomial::from(padded_coeffs)
     }
 
+    // outputs the polynomial size which is usually highest degree + 1
     pub fn len(self: Self) -> Field {
         self.coeffs.len()
     }
 
+    // outputs the highest degree of a polynomial
     pub fn degree(self: Self) -> Field {
         self.len() - 1
     }
 
+    // outputs the leading coefficient
     pub fn leading_coefficient(self: Self) -> PrimeField {
         self.coeffs.get(self.degree())
     }
 
+    // resizes the poly to MAX_POLY_SIZE
     pub fn resize(self: &mut Self) {
         for _i in 0..MAX_POLY_SIZE {
             self.coeffs.push(PrimeField::zero());
         }
     }
 
+    // checks if two polynomials are equal
     pub fn eq(self: Self, other: Self) -> bool {
         let mut res = true;
 
@@ -86,6 +92,7 @@ impl Polynomial {
         res
     }
 
+    // adds two polynomials
     pub fn add(self: Self, other: Self) -> Self {
         let mut poly1 = self;
         let mut poly2 = other;
@@ -103,20 +110,25 @@ impl Polynomial {
         Polynomial::from(new_coeffs)
     }
 
+    // subtracts two polnomials
     pub fn sub(self: Self, other: Self) -> Self {
         self.add(other.negate())
     }
 
+    // multiplies two polynomials
     pub fn mul(self: Self, other: Self) -> Self {
         let mut poly = Polynomial::new();
 
         let poly1_len = self.len() as u112;
         let poly2_len = other.len() as u112;
+
         if poly1_len == 0 {
             poly = Polynomial::default();
         } else if poly2_len == 0 {
             poly = Polynomial::default();
-        } else { 
+        } else {
+            // this is done to resize the resulting polynomial. As, both input polynomials are MAX_POLY_SIZE or lower,
+            // we instantiate the resulting polynomial with MAX_POLY_SIZE * 2 to avoid out of index bounds. 
             let max_degree_times_2 = MAX_POLY_SIZE * 2;
             let mut res_coeffs = [];
 
@@ -157,6 +169,7 @@ impl Polynomial {
         Polynomial::from(coeffs)
     }
 
+    // negates a polynomial
     pub fn negate(self: Self) -> Self {
         let mut coeffs = Vec::new();
         let poly_len = self.len();
@@ -170,6 +183,7 @@ impl Polynomial {
         Polynomial::from(coeffs)
     }
 
+    // subtract the 0th degree coefficient from a field element
     pub fn sub_with_fp(self: Self, element: PrimeField) -> Self {
         self.add(Polynomial::new_monomial(element, 0).negate())
     }

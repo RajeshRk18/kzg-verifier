@@ -20,7 +20,6 @@ Required inputs:
 
 ```rust
 use dep::kzg_verifier::verify_kzg_commit;
-
 fn main() -> bool {
     assert(verify_kzg_commit(srs, x, y, commitment, proof))
 }
