@@ -1,9 +1,9 @@
-use dep::bls12_381_fe::prime_field::PrimeField;
-use dep::bls12_381_curve::bls12_381::g2::G2Point;
-use dep::bls12_381_curve::bls12_381::swcurve::{Curve, Point as G1Point};
-use dep::bls12_381_curve::bls12_381::fp12::Fp12;
-use dep::bls12_381_curve::bls12_381::pairing::{pair, final_exponentiation, miller_loop};
-use dep::bls12_381_curve::bls12_381::{bls12_381, bls12_381_g2, BLS12_381, BLS12_381G2 };
+use dep::bls12_381::field::prime_field::PrimeField;
+use dep::bls12_381::curve::g2::G2Point;
+use dep::bls12_381::curve::swcurve::{Curve, Point as G1Point};
+use dep::bls12_381::curve::fp12::Fp12;
+use dep::bls12_381::curve::pairing::{pair, final_exponentiation, miller_loop};
+use dep::bls12_381::curve::{bls12_381, bls12_381_g2, BLS12_381, BLS12_381G2 };
 use dep::std::collections::vec::Vec;
 
 struct Polynomial {

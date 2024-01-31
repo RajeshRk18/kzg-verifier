@@ -1,5 +1,5 @@
-use dep::bls12_381_curve::bls12_381::g2::G2Point;
-use dep::bls12_381_curve::bls12_381::swcurve::Point as G1Point;
+use dep::bls12_381::curve::g2::G2Point;
+use dep::bls12_381::curve::swcurve::Point as G1Point;
 use dep::std::collections::vec::Vec;
 
 // Structured Reference String created from trusted setups
