@@ -6,6 +6,18 @@ use dep::bls12_381::curve::pairing::{pair, final_exponentiation, miller_loop};
 use dep::bls12_381::curve::{bls12_381, bls12_381_g2, BLS12_381, BLS12_381G2 };
 use dep::std::collections::vec::Vec;
 
+/// This wont work if the polynomial is of size larger than MAX_POLY_SIZE as the loop is unbounded and the compiler expects it to be bounded in compole time.
+/// This should not impact the verifier api because verifier does not need to evaluate any polynomial.
+
+/// If we want to work with polynomials of size larger than MAX_POLY_SIZE, maybe we can do the following:
+///           - sub divide a polynomial of size MAX_SUB_POLY_SIZE and iterating upto `MAX_ITERATIONS` for ops. 
+///           - With this trick, we can operate over polynomials upto degree MAX_SUB_POLY_SIZE * MAX_ITERATIONS - 1.
+/// NOTE: This trick will add lots of complexities to the code.
+
+/// As the loop needs to be bounded, we restrict the polynomial size. This is highly inefficient and generates more constraints than needed 
+/// if the polynomial is less than MAX_POLY_SIZE.
+global MAX_POLY_SIZE: u112 = 1000000;
+
 struct Polynomial {
     coeffs: Vec<PrimeField>
 }
@@ -52,8 +64,8 @@ impl Polynomial {
         self.coeffs.get(self.degree())
     }
 
-    pub fn resize(self: &mut Self, len: Field) {
-        for _i in 0..len {
+    pub fn resize(self: &mut Self) {
+        for _i in 0..MAX_POLY_SIZE {
             self.coeffs.push(PrimeField::zero());
         }
     }
@@ -63,18 +75,13 @@ impl Polynomial {
 
         let mut poly1 = self;
         let mut poly2 = other;
-        let poly1_len = self.len();
-        let poly2_len = other.len();
 
-        if poly1_len as u112 > poly2_len as u112 {
-            poly2.resize(poly1_len - poly2_len);
-        } else if poly1_len as u112 > poly2_len as u112 {
-            poly1.resize(poly2_len - poly1_len);
+        poly1.resize();
+        poly2.resize();
+
+        for i in 0..MAX_POLY_SIZE {
+            res &= poly1.coeffs.get(i as Field).eq(poly2.coeffs.get(i as Field));
         }
-
-        for i in 0..poly1_len {
-            res &= poly1.coeffs.get(i).eq(poly2.coeffs.get(i));
-        } 
 
         res
     }
@@ -82,19 +89,14 @@ impl Polynomial {
     pub fn add(self: Self, other: Self) -> Self {
         let mut poly1 = self;
         let mut poly2 = other;
-        let poly1_len = poly1.len();
-        let poly2_len = poly2.len();
 
         let mut new_coeffs = Vec::new();
 
-        if poly1_len as u112 > poly2_len as u112 {
-            poly2.resize(poly1_len - poly2_len);
-        } else if poly1_len as u112 > poly2_len as u112 {
-            poly1.resize(poly2_len - poly1_len);
-        }
+        poly1.resize();
+        poly2.resize();
 
-        for i in 0..poly1_len {
-            let res = poly1.coeffs.get(i).add(poly2.coeffs.get(i));
+        for i in 0..MAX_POLY_SIZE {
+            let res = poly1.coeffs.get(i as Field).add(poly2.coeffs.get(i as Field));
             new_coeffs.push(res);
         }
 
@@ -115,17 +117,17 @@ impl Polynomial {
         } else if poly2_len == 0 {
             poly = Polynomial::default();
         } else { 
-            let res_degree = self.len() + other.len();
+            let max_degree_times_2 = MAX_POLY_SIZE * 2;
             let mut res_coeffs = [];
 
-            for _i in 0..res_degree {
+            for _i in 0..max_degree_times_2 {
                 res_coeffs = res_coeffs.push_back(PrimeField::zero());
             }
 
-            for i in 0..other.degree()+1 {
-                for j in 0..self.degree()+1 {
+            for i in 0..MAX_POLY_SIZE {
+                for j in 0..MAX_POLY_SIZE {
                     let mut coeff_at_index = res_coeffs[i+j];
-                    let temp = coeff_at_index.add(other.coeffs.get(i).mul(self.coeffs.get(j)));
+                    let temp = coeff_at_index.add(other.coeffs.get(i as Field).mul(self.coeffs.get(j as Field)));
                     res_coeffs[i+j] = temp;
                 }
             }
@@ -143,9 +145,13 @@ impl Polynomial {
         let mut coeffs = Vec::new();
         let mut coeff_at_pos = self.coeffs.get(self.degree());
 
-        for i in 0..self.degree() {
-            coeffs.push(coeff_at_pos);
-            coeff_at_pos = self.coeffs.get(i).add(coeff_at_pos.mul(element));
+        let poly_len = self.len();
+
+        for i in 0..MAX_POLY_SIZE {
+            if poly_len as u112 < MAX_POLY_SIZE {
+                coeffs.push(coeff_at_pos);
+                coeff_at_pos = self.coeffs.get(i as Field).add(coeff_at_pos.mul(element));
+            }
         }
 
         Polynomial::from(coeffs)
@@ -153,9 +159,12 @@ impl Polynomial {
 
     pub fn negate(self: Self) -> Self {
         let mut coeffs = Vec::new();
+        let poly_len = self.len();
 
-        for i in 0..self.coeffs.len() {
-            coeffs.push(self.coeffs.get(i).neg());
+        for i in 0..MAX_POLY_SIZE {
+            if poly_len as u112 < MAX_POLY_SIZE {
+                coeffs.push(self.coeffs.get(i as Field).neg());
+            }
         }
 
         Polynomial::from(coeffs)
@@ -164,4 +173,42 @@ impl Polynomial {
     pub fn sub_with_fp(self: Self, element: PrimeField) -> Self {
         self.add(Polynomial::new_monomial(element, 0).negate())
     }
+}
+
+#[test]
+fn test_poly1() {
+    let eq1 = Polynomial::new_monomial(PrimeField::zero(), 0);
+    let eq2 = Polynomial::new_monomial(PrimeField::one(), 0);
+
+    assert(eq1.mul(eq2).eq(eq1));
+}
+
+#[test]
+fn test_poly2() {
+    let eq1 = Polynomial::new_monomial(PrimeField::from_u56(5), 0);
+    let eq2 = Polynomial::new_monomial(PrimeField::from_u56(6), 0);
+    let eq3 = Polynomial::new_monomial(PrimeField::from_u56(30), 0);
+
+    assert(eq1.mul(eq2).eq(eq3));
+}
+
+#[test]
+fn test_poly3() {
+    let mut coeff = Vec::new();
+    coeff.push(PrimeField::from_u56(7));
+
+    let eq1 = Polynomial::from(coeff);
+    let eq2 = Polynomial::new_monomial(PrimeField::from_u56(6), 0);
+    let eq3 = Polynomial::new_monomial(PrimeField::from_u56(13), 0);
+
+    assert(eq1.add(eq2).eq(eq3));
+}
+
+#[test]
+fn test_resize() {
+    let mut poly = Polynomial::new_monomial(PrimeField::from_u56(45), 6);
+    let len = poly.len();
+    poly.resize();
+
+    assert(poly.len() as u112 == len as u112 + MAX_POLY_SIZE);
 }

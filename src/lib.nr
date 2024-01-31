@@ -13,7 +13,7 @@ mod pairing;
 use crate::srs::SRS;
 use crate::pairing::{g1_scalar_mul, g2_scalar_mul, g1_add, g2_add, compute_pairing};
 
-fn verify_kzg_commit(
+pub fn verify_kzg_commit(
     srs: SRS,
     x: PrimeField,
     y: PrimeField,
@@ -78,3 +78,4 @@ fn test_verify_works() {
     let proof = g1_curve.gen;
     assert(verify_kzg_commit(srs, x, y, commitment, proof));
 }
+
