@@ -16,7 +16,7 @@ use dep::std::collections::vec::Vec;
 
 /// As the loop needs to be bounded, we restrict the polynomial size. This is highly inefficient and generates more constraints than needed 
 /// if the polynomial is less than MAX_POLY_SIZE.
-global MAX_POLY_SIZE: u112 = 1000000;
+global MAX_POLY_SIZE: u112 = 1000000000;
 
 struct Polynomial {
     coeffs: Vec<PrimeField>
