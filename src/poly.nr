@@ -30,7 +30,7 @@ impl Polynomial {
         }
     }
 
-    pub fn from(coeffs: Vec<PrimeField>) -> Self {
+    pub fn from_coeffs(coeffs: Vec<PrimeField>) -> Self {
         Self {
             coeffs
         }
@@ -50,7 +50,7 @@ impl Polynomial {
 
         padded_coeffs.push(coeff);
 
-        Polynomial::from(padded_coeffs)
+        Polynomial::from_coeffs(padded_coeffs)
     }
 
     // outputs the polynomial size which is usually highest degree + 1
@@ -107,7 +107,7 @@ impl Polynomial {
             new_coeffs.push(res);
         }
 
-        Polynomial::from(new_coeffs)
+        Polynomial::from_coeffs(new_coeffs)
     }
 
     // subtracts two polnomials
@@ -145,7 +145,7 @@ impl Polynomial {
             }
             let res_coeffs: [PrimeField] = res_coeffs;
 
-            poly = Polynomial::from(Vec::from_slice(res_coeffs));
+            poly = Polynomial::from_coeffs(Vec::from_slice(res_coeffs));
         }
 
         poly
@@ -166,7 +166,7 @@ impl Polynomial {
             }
         }
 
-        Polynomial::from(coeffs)
+        Polynomial::from_coeffs(coeffs)
     }
 
     // negates a polynomial
@@ -180,7 +180,7 @@ impl Polynomial {
             }
         }
 
-        Polynomial::from(coeffs)
+        Polynomial::from_coeffs(coeffs)
     }
 
     // subtract the 0th degree coefficient from a field element
@@ -211,7 +211,7 @@ fn test_poly3() {
     let mut coeff = Vec::new();
     coeff.push(PrimeField::from_u56(7));
 
-    let eq1 = Polynomial::from(coeff);
+    let eq1 = Polynomial::from_coeffs(coeff);
     let eq2 = Polynomial::new_monomial(PrimeField::from_u56(6), 0);
     let eq3 = Polynomial::new_monomial(PrimeField::from_u56(13), 0);
 
