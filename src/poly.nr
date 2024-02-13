@@ -6,12 +6,13 @@ use dep::bls12_381::curve::pairing::{pair, final_exponentiation, miller_loop};
 use dep::bls12_381::curve::{bls12_381, bls12_381_g2, BLS12_381, BLS12_381G2 };
 use dep::std::collections::vec::Vec;
 
-/// This wont work if the polynomial is of size larger than MAX_POLY_SIZE as the loop is unbounded and the compiler expects it to be bounded in compole time.
+/// This wont work if the polynomial is of size larger than MAX_POLY_SIZE as the loop is unbounded and the compiler expects it to be bounded in compile time.
 /// This should not impact the verifier api because verifier does not need to evaluate any polynomial.
 
 /// If we want to work with polynomials of size larger than MAX_POLY_SIZE, maybe we can do the following:
 ///           - sub divide a polynomial of size MAX_SUB_POLY_SIZE and iterating upto `MAX_ITERATIONS` for ops. 
 ///           - With this trick, we can operate over polynomials upto degree MAX_SUB_POLY_SIZE * MAX_ITERATIONS - 1.
+/// We can have a rust, or any other language wrapper which does the sub dividing. 
 /// NOTE: This trick will add lots of complexities to the code.
 
 /// As the loop needs to be bounded, we restrict the polynomial size. This is highly inefficient and generates more constraints than needed 

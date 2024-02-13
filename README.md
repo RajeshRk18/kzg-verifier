@@ -20,10 +20,15 @@ Required inputs:
 
 ```rust
 use dep::kzg_verifier::verify_kzg_commit;
-fn main() -> bool {
+
     assert(verify_kzg_commit(srs, x, y, commitment, proof))
-}
 ```
+
+## Limitations
+
+- Only BLS12_381 curve is supported currently.
+
+- Only commitment verification is available. Other operations such as commit, and open are yet to be supported.
 
 ## Acknowledgements
 

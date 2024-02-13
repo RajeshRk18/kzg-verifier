@@ -32,7 +32,7 @@ pub fn verify_kzg_commit(
 }
 
 #[test]
-fn test_verify_works() {
+fn test_verify1() {
     let toxic_waste = PrimeField::from_u56(100 as u56);
 
     let BLS12_381 { curve } = bls12_381();
@@ -46,7 +46,7 @@ fn test_verify_works() {
     for i in 0..50 {
         let mut exponent = PrimeField::one();
 
-        for j in 0..i {
+        for _j in 0..i {
             exponent = toxic_waste.mul(exponent);
         }
         g1_points.push(g1_scalar_mul(g1_curve.gen, exponent));
@@ -78,4 +78,3 @@ fn test_verify_works() {
     let proof = g1_curve.gen;
     assert(verify_kzg_commit(srs, x, y, commitment, proof));
 }
-
