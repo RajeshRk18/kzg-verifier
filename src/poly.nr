@@ -1,4 +1,4 @@
-use dep::bls12_381::field::prime_field::PrimeField;
+use dep::bls12_381::field::prime_field::PrimeField as Fp;
 use dep::bls12_381::curve::g2::G2Point;
 use dep::bls12_381::curve::swcurve::{Curve, Point as G1Point};
 use dep::bls12_381::curve::fp12::Fp12;
@@ -20,7 +20,7 @@ use dep::std::collections::vec::Vec;
 global MAX_POLY_SIZE: u112 = 1000000000;
 
 struct Polynomial {
-    coeffs: Vec<PrimeField>
+    coeffs: Vec<Fp>
 }
 
 impl Polynomial {
@@ -31,7 +31,7 @@ impl Polynomial {
         }
     }
 
-    pub fn from_coeffs(coeffs: Vec<PrimeField>) -> Self {
+    pub fn from_coeffs(coeffs: Vec<Fp>) -> Self {
         Self {
             coeffs
         }
@@ -42,11 +42,11 @@ impl Polynomial {
     }
 
     // creates a new monomial of given degree
-    pub fn new_monomial(coeff: PrimeField, degree: Field) -> Self {
+    pub fn new_monomial(coeff: Fp, degree: Field) -> Self {
         let mut padded_coeffs = Vec::new();
 
         for _i in 0..degree {
-            padded_coeffs.push(PrimeField::zero());
+            padded_coeffs.push(Fp::zero());
         }
 
         padded_coeffs.push(coeff);
@@ -65,14 +65,14 @@ impl Polynomial {
     }
 
     // outputs the leading coefficient
-    pub fn leading_coefficient(self: Self) -> PrimeField {
+    pub fn leading_coefficient(self: Self) -> Fp {
         self.coeffs.get(self.degree())
     }
 
     // resizes the poly to MAX_POLY_SIZE
     pub fn resize(self: &mut Self) {
         for _i in 0..MAX_POLY_SIZE {
-            self.coeffs.push(PrimeField::zero());
+            self.coeffs.push(Fp::zero());
         }
     }
 
@@ -134,7 +134,7 @@ impl Polynomial {
             let mut res_coeffs = [];
 
             for _i in 0..max_degree_times_2 {
-                res_coeffs = res_coeffs.push_back(PrimeField::zero());
+                res_coeffs = res_coeffs.push_back(Fp::zero());
             }
 
             for i in 0..MAX_POLY_SIZE {
@@ -144,7 +144,7 @@ impl Polynomial {
                     res_coeffs[i+j] = temp;
                 }
             }
-            let res_coeffs: [PrimeField] = res_coeffs;
+            let res_coeffs: [Fp] = res_coeffs;
 
             poly = Polynomial::from_coeffs(Vec::from_slice(res_coeffs));
         }
@@ -154,7 +154,7 @@ impl Polynomial {
 
     /// Ruffini division is long division where the divisor is a binomial of the form `x - r`. Its an efficient algorithm of this setting.
     /// This can be used in the verify fn where the divisor is a binomial `x - r`
-    pub fn div(self: Self, element: PrimeField) -> Self {
+    pub fn div(self: Self, element: Fp) -> Self {
         let mut coeffs = Vec::new();
         let mut coeff_at_pos = self.coeffs.get(self.degree());
 
@@ -185,24 +185,24 @@ impl Polynomial {
     }
 
     // subtract the 0th degree coefficient from a field element
-    pub fn sub_with_fp(self: Self, element: PrimeField) -> Self {
+    pub fn sub_with_fp(self: Self, element: Fp) -> Self {
         self.add(Polynomial::new_monomial(element, 0).negate())
     }
 }
 
 #[test]
 fn test_poly1() {
-    let eq1 = Polynomial::new_monomial(PrimeField::zero(), 0);
-    let eq2 = Polynomial::new_monomial(PrimeField::one(), 0);
+    let eq1 = Polynomial::new_monomial(Fp::zero(), 0);
+    let eq2 = Polynomial::new_monomial(Fp::one(), 0);
 
     assert(eq1.mul(eq2).eq(eq1));
 }
 
 #[test]
 fn test_poly2() {
-    let eq1 = Polynomial::new_monomial(PrimeField::from_u56(5), 0);
-    let eq2 = Polynomial::new_monomial(PrimeField::from_u56(6), 0);
-    let eq3 = Polynomial::new_monomial(PrimeField::from_u56(30), 0);
+    let eq1 = Polynomial::new_monomial(Fp::from_u56(5), 0);
+    let eq2 = Polynomial::new_monomial(Fp::from_u56(6), 0);
+    let eq3 = Polynomial::new_monomial(Fp::from_u56(30), 0);
 
     assert(eq1.mul(eq2).eq(eq3));
 }
@@ -210,18 +210,18 @@ fn test_poly2() {
 #[test]
 fn test_poly3() {
     let mut coeff = Vec::new();
-    coeff.push(PrimeField::from_u56(7));
+    coeff.push(Fp::from_u56(7));
 
     let eq1 = Polynomial::from_coeffs(coeff);
-    let eq2 = Polynomial::new_monomial(PrimeField::from_u56(6), 0);
-    let eq3 = Polynomial::new_monomial(PrimeField::from_u56(13), 0);
+    let eq2 = Polynomial::new_monomial(Fp::from_u56(6), 0);
+    let eq3 = Polynomial::new_monomial(Fp::from_u56(13), 0);
 
     assert(eq1.add(eq2).eq(eq3));
 }
 
 #[test]
 fn test_resize() {
-    let mut poly = Polynomial::new_monomial(PrimeField::from_u56(45), 6);
+    let mut poly = Polynomial::new_monomial(Fp::from_u56(45), 6);
     let len = poly.len();
     poly.resize();
 
