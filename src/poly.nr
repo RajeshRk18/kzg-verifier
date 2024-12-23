@@ -1,4 +1,4 @@
-use dep::bls12_381::field::prime_field::PrimeField as Fp;
+/*use dep::bls12_381::field::prime_field::PrimeField as Fp;
 use dep::bls12_381::curve::g2::G2Point;
 use dep::bls12_381::curve::swcurve::{Curve, Point as G1Point};
 use dep::bls12_381::curve::fp12::Fp12;
@@ -227,3 +227,4 @@ fn test_resize() {
 
     assert(poly.len() as u112 == len as u112 + MAX_POLY_SIZE);
 }
+*/

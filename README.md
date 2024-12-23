@@ -24,7 +24,7 @@ use dep::kzg_verifier::utils::{create_g1_point, create_g2_point};
 use dep::kzg_verifier::srs::SRS;
 use dep::bls12_381::field::prime_field::PrimeField as Fp;
 
-    fn main(srs_g1_x: [u8; 48], srs_g1_y: [u8; 48], srs_g2_1_x_c0: [u8; 48], srs_g2_1_x_c1: [u8; 48], srs_g2_1_y_c0: [u8; 48], srs_g2_1_y_c1: [u8; 48], srs_g2_2_x_c0: [u8; 48], srs_g2_2_x_c1: [u8; 48], srs_g2_2_y_c0: [u8; 48], srs_g2_2_y_c1: [u8; 48], x: [u8; 48], y: [u8; 48], commitment_x: [u8; 48], commitment_y: [u8; 48], proof_x: [u8; 48], proof_y: [u8; 48]) -> bool {
+    fn main(srs_g1_x: [u8; 48], srs_g1_y: [u8; 48], srs_g2_1_x_c0: [u8; 48], srs_g2_1_x_c1: [u8; 48], srs_g2_1_y_c0: [u8; 48], srs_g2_1_y_c1: [u8; 48], srs_g2_2_x_c0: [u8; 48], srs_g2_2_x_c1: [u8; 48], srs_g2_2_y_c0: [u8; 48], srs_g2_2_y_c1: [u8; 48], x: [u8; 48], y: [u8; 48], pub commitment_x: [u8; 48], pub commitment_y: [u8; 48], pub proof_x: [u8; 48], pub proof_y: [u8; 48]) -> bool {
         let srs_g1 = create_g1_point(srs_g1_x, srs_g1_y);
 
         let srs_g2_1 = create_g2_point(srs_g2_1_x_c0, srs_g2_1_x_c1, srs_g2_1_y_c0, srs_g2_1_y_c1);
@@ -50,13 +50,10 @@ use dep::bls12_381::field::prime_field::PrimeField as Fp;
 
 ## Limitations
 
-- Only BLS12_381 curve is supported currently.
+- BLS12_381 curve is supported currently.
 
-- Only commitment verification is available. Other operations such as commit, and open are yet to be supported.
 
 ## Acknowledgements
 
 [Lamdaworks](https://github.com/RajeshRk18/lambdaworks)
 
-## Disclaimer
-This is experimental software and is provided on an "as is" and "as available" basis. We do not give any warranties and will not be liable for any losses incurred through any use of this code base.

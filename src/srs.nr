@@ -1,15 +1,15 @@
-use dep::bls12_381::curve::g2::G2Point;
-use dep::bls12_381::curve::swcurve::Point as G1Point;
-use dep::std::collections::vec::Vec;
+use bls12_381::pairings::{G1Affine, G2Affine};
 
-// Structured Reference String created from trusted setups
-struct SRS {
-    g1_points: Vec<G1Point>,
-    g2_points: [G2Point; 2]
+//
+/// Structured Reference String created from trusted setups
+//
+pub struct SRS<let N: u32> {
+    g1_points: [G1Affine; N],
+    g2_points: [G2Affine; 2]
 }
 
-impl SRS {
-    pub fn new(g1_points: Vec<G1Point>, g2_points: [G2Point; 2]) -> Self {
+impl<let N: u32> SRS<N> {
+    pub fn new(g1_points: [G1Point; N], g2_points: [G2Point; 2]) -> Self {
         Self {
             g1_points,
             g2_points
