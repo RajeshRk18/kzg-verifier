@@ -1,0 +1,12 @@
+{
+    "name": "Noir on Codespaces",
+    "build": {
+       "context": ".",
+       "dockerfile": "Dockerfile"
+     },
+     "customizations": {
+       "vscode": {
+         "extensions": ["noir-lang.vscode-noir"]
+       }
+     }
+}
