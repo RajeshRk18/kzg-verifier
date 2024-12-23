@@ -1,9 +1,7 @@
-use bls12_381::pairings::{G1Affine, G2Affine, miller_loop};
 use bls12_381::fp12::Fp12;
-use bls12_381::fp2::{Fp, Fp2};
-use crate::ec::g2_is_identity;
+use bls12_381::pairings::{G1Affine, G2Affine, miller_loop};
 
-// Optimized pairing from https://github.com/lambdaclass/lambdaworks/blob/2ce8b2ea2dd6547848b63db2246912b06066dd1b/math/src/elliptic_curve/short_weierstrass/curves/bls12_381/pairing.rs#L96 
+// Optimized pairing from https://github.com/lambdaclass/lambdaworks/blob/2ce8b2ea2dd6547848b63db2246912b06066dd1b/math/src/elliptic_curve/short_weierstrass/curves/bls12_381/pairing.rs#L96
 pub(crate) fn pairing_batch(p: (G1Affine, G2Affine), q: (G1Affine, G2Affine)) -> Fp12 {
     let mut res = Fp12::one();
 

@@ -19,41 +19,36 @@ Required inputs:
 - Evaluation Proof $\pi$
 
 ```rust
-use dep::kzg_verifier::verify_kzg_commit;
-use dep::kzg_verifier::utils::{create_g1_point, create_g2_point};
-use dep::kzg_verifier::srs::SRS;
-use dep::bls12_381::field::prime_field::PrimeField as Fp;
+use kzg_verifier::verify_kzg_commit;
+use kzg_verifier::utils::{g1_from_bytes, g2_from_bytes};
+use kzg_verifier::srs::SRS;
+use kzg_verifier::ec::Fr;
 
-    fn main(srs_g1_x: [u8; 48], srs_g1_y: [u8; 48], srs_g2_1_x_c0: [u8; 48], srs_g2_1_x_c1: [u8; 48], srs_g2_1_y_c0: [u8; 48], srs_g2_1_y_c1: [u8; 48], srs_g2_2_x_c0: [u8; 48], srs_g2_2_x_c1: [u8; 48], srs_g2_2_y_c0: [u8; 48], srs_g2_2_y_c1: [u8; 48], x: [u8; 48], y: [u8; 48], pub commitment_x: [u8; 48], pub commitment_y: [u8; 48], pub proof_x: [u8; 48], pub proof_y: [u8; 48]) -> bool {
-        let srs_g1 = create_g1_point(srs_g1_x, srs_g1_y);
+    fn main(srs_g1_x: [u8; 48], srs_g1_y: [u8; 48], srs_g2_1_x_c0: [u8; 48], srs_g2_1_x_c1: [u8; 48], srs_g2_1_y_c0: [u8; 48], srs_g2_1_y_c1: [u8; 48], srs_g2_2_x_c0: [u8; 48], srs_g2_2_x_c1: [u8; 48], srs_g2_2_y_c0: [u8; 48], srs_g2_2_y_c1: [u8; 48], x: [u8; 32], y: [u8; 32], commitment_x: [u8; 48], commitment_y: [u8; 48], proof_x: [u8; 48], proof_y: [u8; 48]) {
+        let srs_g1 = g1_from_bytes(srs_g1_x, srs_g1_y);
 
-        let srs_g2_1 = create_g2_point(srs_g2_1_x_c0, srs_g2_1_x_c1, srs_g2_1_y_c0, srs_g2_1_y_c1);
+        let srs_g2_1 = g2_from_bytes(srs_g2_1_x_c0, srs_g2_1_x_c1, srs_g2_1_y_c0, srs_g2_1_y_c1);
 
-        let srs_g2_2 = create_g2_point(srs_g2_2_x_c0, srs_g2_2_x_c1, srs_g2_2_y_c0, srs_g2_2_y_c1);
+        let srs_g2_2 = g2_from_bytes(srs_g2_2_x_c0, srs_g2_2_x_c1, srs_g2_2_y_c0, srs_g2_2_y_c1);
 
-        let mut srs_g1_points = Vec::new();
-        srs_g1_points.push(srs_g1);
+        let mut srs_g1_points = [srs_g1; 1];
 
         let srs = SRS::new(srs_g1_points, [srs_g2_1, srs_g2_2]);
 
-        let x = Fp::from_bytes(x);
+        let x = Fr::from_be_bytes(x);
 
-        let y = Fp::from_bytes(y);
+        let y = Fr::from_be_bytes(y);
     
-        let commitment = create_g1_point(commitment_x, commitment_y);
+        let commitment = g1_from_bytes(commitment_x, commitment_y);
 
-        let proof = create_g1_point(proof_x, proof_y);
+        let proof = g1_from_bytes(proof_x, proof_y);
 
-        assert(verify_kzg_commit(srs, x, y, commitment, proof))
+        assert(verify_kzg_commit(srs, x, y, commitment, proof));
     }
 ```
-
-## Limitations
-
-- BLS12_381 curve is supported currently.
 
 
 ## Acknowledgements
 
 [Lamdaworks](https://github.com/RajeshRk18/lambdaworks)
-
+[zkcrypto](https://github.com/zkcrypto/bls12_381)
