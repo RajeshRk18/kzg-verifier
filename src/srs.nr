@@ -9,7 +9,7 @@ pub struct SRS<let N: u32> {
 }
 
 impl<let N: u32> SRS<N> {
-    pub fn new(g1_points: [G1Point; N], g2_points: [G2Point; 2]) -> Self {
+    pub fn new(g1_points: [G1Affine; N], g2_points: [G2Affine; 2]) -> Self {
         Self {
             g1_points,
             g2_points

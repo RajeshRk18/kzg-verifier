@@ -1,17 +1,18 @@
-use bls12_381::pairings::{G1Affine, G2Affine, miller_loop};
-use bls12_381::fp2::Fp;
+use bls12_381::pairings::{G1Affine, G2Affine, G2Projective, miller_loop};
+use bls12_381::fp2::{Fp, Fp2};
 use bignum::BigNum;
 use bignum::fields::bls12_381Fq::BLS12_381_Fq_Params;
-use crate::utils::to_bits;
+use bignum::fields::bls12_381Fr::BLS12_381_Fr_Params;
+use crate::utils::{to_bits, g1_from_bytes, g2_from_bytes};
 
 // Scalar Field
-pub type Fr = BigNum<4, 255, BLS12_381_Fr_Params>;
+pub type Fr = BigNum<3, 255, BLS12_381_Fr_Params>;
 global SCALAR_NUM_BITS: u32 = 255 as u32; // Scalar Field Modulus Bit length
 
 //
 /// G1 Projective
 //
-pub(crate) struct G1Projective {
+pub struct G1Projective {
     x: Fp,
     y: Fp,
     z: Fp,
@@ -21,36 +22,53 @@ pub(crate) struct G1Projective {
 impl G1Projective {
     // TODO: Do we need to validate the point?
     pub fn from_affine(point: G1Affine) -> Self {
-        let z = if point.is_identity { Fp::zero() } else { Fp::one() };
+        let z = if point.infinity { Fp::new() } else { Fp::one() };
         G1Projective {
             x: point.x,
-            y: poiny.y,
+            y: point.y,
             z,
         }
     }
 
-    pub fn is_identity(&self) -> bool {
-        self.z == Fp::zero()
+    pub fn identity() -> Self {
+        G1Projective {
+            x: Fp::new(),
+            y: Fp::one(),
+            z: Fp::new(),
+        }
+    }
+
+    pub fn is_identity(self) -> bool {
+        self.z == Fp::new()
     }
 
     // converts to coordinates in affine space
-    pub fn normalize(&self) -> G1Affine {
+    pub fn normalize(self) -> G1Affine {
         let mut affine_point = G1Affine::identity();
         unsafe {
-            let z_inv = self.z.__invmod();
-            assert(z_inv * self.z == Fp::one()); 
-            // We dont need to check if z_inv is zero before normalizing because the above assertion will fail. 
-            let norm_x = self.x * z_inv;
-            let norm_y = self.y * z_inv;
-            affine_point.x = norm_x;
-            affine_point.y = norm_y;
-            affine_point.infinity = false;
-        }
+            if self.is_identity() {
+                G1Affine {
+                    x: Fp::new(),
+                    y: Fp::one(),
+                    infinity: true
+                }
+            } else {
+                let z_inv = self.z.__invmod();
+                assert(z_inv * self.z == Fp::one()); 
+                // We dont need to check if z_inv is zero before normalizing because the above assertion will fail. 
+                let norm_x = self.x * z_inv;
+                let norm_y = self.y * z_inv;
 
-        affine_point
+                G1Affine {
+                    x: norm_x,
+                    y: norm_y,
+                    infinity: false,
+                }
+            }
+        }
     }
 
-    pub fn double(&self) -> G1Projective {
+    pub fn double(self) -> G1Projective {
         let t0 = self.y * self.y;
         let z3 = t0 + t0;
         let z3 = z3 + z3;
@@ -84,7 +102,7 @@ impl G1Projective {
         res
     }
 
-    pub fn add(&self, rhs: &G1Projective) -> G1Projective {
+    pub fn add(self, rhs: G1Projective) -> G1Projective {
         let t0 = self.x * rhs.x;
         let t1 = self.y * rhs.y;
         let t2 = self.z * rhs.z;
@@ -126,15 +144,15 @@ impl G1Projective {
         }
     }
 
-    pub fn mul(&self, scalar: Fr) -> Self {
+    pub fn mul(self, scalar: Fr) -> Self {
         let mut acc = G1Projective::identity();
         let mut temp = self;
         let mut scalar_bytes = scalar.to_le_bytes();
         
         let bits = to_bits::<32, SCALAR_NUM_BITS>(scalar_bytes);
 
-        for bit in 0..bits {
-            if bit == 1 as u1 {
+        for i in 0..=255 {
+            if bits[i] == 1 as u1 {
                 acc = temp.add(acc);
             }
             temp = temp.double();
@@ -165,16 +183,24 @@ fn g2_b3() -> Fp2 {
 /// Extending G2 from https://github.com/ewynx/noir_bls12_381_pairing/blob/99319731cc9ece4b4469ac8a0afe92fda5771020/src/pairings.nr#L8
 //
 
-pub fn g2_identity() -> G2Affine {
+pub(crate) fn g2__proj_identity() -> G2Projective {
+    G2Projective {
+        x: Fp2::zero(),
+        y: Fp2::one(),
+        z: Fp2::zero()
+    }
+}
+
+pub(crate) fn g2_identity() -> G2Affine {
     G2Affine {
         x: Fp2::zero(),
-        y: FP2::one(),
+        y: Fp2::one(),
         infinity: true,
     }
 }
 
-pub fn g2_is_identity(p: G2Projective) -> bool {
-    (p.z.c0 == Fp::zero()) && (p.z.c1 == Fp::zero())
+pub(crate) fn g2_is_identity(p: G2Projective) -> bool {
+    (p.z.c0 == Fp::new()) & (p.z.c1 == Fp::new())
 }
 
 pub fn g2_generator() -> G2Projective {
@@ -199,14 +225,14 @@ pub fn g2_generator() -> G2Projective {
     }
 }
 
-pub fn g2_projective(p: G2Affine) -> G2Projective {
+pub(crate) fn g2_projective(p: G2Affine) -> G2Projective {
     let mut p_proj = G2Projective {
         x: p.x,
         y: p.y,
         z: Fp2::one()
     };
 
-    if p_proj.infinity {
+    if p.infinity {
         p_proj.z = Fp2::zero();
     }
 
@@ -241,13 +267,13 @@ pub fn g2_double(p: G2Projective) -> G2Projective {
     };
 
     if g2_is_identity(tmp) {
-        g2_identity
+        g2_identity()
     } else {
         tmp
     }
 }
 
-pub fn add(lhs: G2Projective, rhs: G2Projective) -> G2Projective {
+pub fn g2_add(lhs: G2Projective, rhs: G2Projective) -> G2Projective {
     let t0 = lhs.x * rhs.x;
     let t1 = lhs.y * rhs.y;
     let t2 = lhs.z * rhs.z;
@@ -290,7 +316,7 @@ pub fn add(lhs: G2Projective, rhs: G2Projective) -> G2Projective {
 }
 
 pub fn g2_multiply(point: G2Projective, scalar: Fr) -> G2Projective {
-    let mut acc = g2_identity();
+    let mut acc = g2_proj_identity();
     let mut temp = point;
 
     let scalar_bytes = scalar.to_le_bytes();
@@ -341,7 +367,7 @@ fn test_g2_mul() {
     let scalar_2 = g2_multiply(g2_generator(), two);
 
     let g2_gen_add = g2_add(g2_generator(), g2_generator());
-    assert(scalar_2.x == g2_gen_add.x);
-    assert(scalar_2.y == g2_gen_add.y);
-    assert(scalar_2.z == g2_gen_add.z);
+    assert(scalar_2.x.eq(g2_gen_add.x));
+    assert(scalar_2.y.eq(g2_gen_add.y));
+    assert(scalar_2.z.eq(g2_gen_add.z));
 }

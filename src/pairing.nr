@@ -7,7 +7,7 @@ use crate::ec::g2_is_identity;
 pub(crate) fn pairing_batch(p: (G1Affine, G2Affine), q: (G1Affine, G2Affine)) -> Fp12 {
     let mut res = Fp12::one();
 
-    if !(p.0.infinity && g2_is_identity(p.1) && q.0.infinity && g2_is_identity(q.1)) {
+    if !(p.0.infinity & p.1.infinity & q.0.infinity & q.1.infinity) {
         let p_miller = miller_loop(p.0, p.1);
         let q_miller = miller_loop(q.0, q.1);
         res = p_miller.mul(q_miller).final_exponentiation();

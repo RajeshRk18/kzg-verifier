@@ -1,12 +1,12 @@
-use bls12_381::curve::fp2::Fp2;
-use bls12_381::pairings::G1Affine;
+use bls12_381::fp2::{Fp, Fp2};
+use bls12_381::pairings::{G1Affine, G2Affine, G2Projective};
 use crate::ec::G1Projective;
 
 pub(crate) fn g1_from_bytes(x: [u8; 48], y: [u8; 48]) -> G1Affine {
-    let x = Fp::from_be_bytes(x.as_slice());
-    let y = Fp::from_be_bytes(y.as_slice());
+    let x = Fp::from_be_bytes(x);
+    let y = Fp::from_be_bytes(y);
 
-    if (x == Fp::zero()) && (y == Fp::one()) {
+    if (x == Fp::new()) & (y == Fp::one()) {
         G1Affine {
             x,
             y,
@@ -40,15 +40,15 @@ pub fn g2_from_bytes(x_c0: [u8; 48], x_c1: [u8; 48], y_c0: [u8; 48], y_c1: [u8; 
 }
 
 // TODO: Optimize this
-pub fn to_bits<let NBytes: u32, let Nbits: u32>(bytes: [u8; NBytes]) -> [u1; NBits] {
+pub fn to_bits<let NBytes: u32, let NBits: u32>(bytes: [u8; NBytes]) -> [u1; NBits] {
     let mut bits: [u1; NBits] = [0; NBits];
     for byte in bytes {
         let mut byte = byte;
 
         for i in 0..8 {
-            let bit = byte & 1 as u1;
+            let bit = byte as u1;
             byte >>= 1;
-            bit.push(bit);
+            bits.push_back(bit);
         }
     }
     bits
