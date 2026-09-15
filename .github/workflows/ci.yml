@@ -33,7 +33,9 @@ jobs:
         run: nargo info
 
   pairing:
-    # Two Miller loops per case; hours and tens of GB of RAM.
+    # Two Miller loops per case. One case peaked at 6.6 GB and ~14 min locally;
+    # running them in parallel OOM-kills the runner, hence --test-threads 1.
+    # A standard 7 GB runner is marginal for this; use a larger one if it fails.
     # Not a pull-request gate.
     if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
@@ -45,4 +47,4 @@ jobs:
           curl -L https://raw.githubusercontent.com/noir-lang/noirup/main/install | bash
           echo "$HOME/.nargo/bin" >> "$GITHUB_PATH"
       - run: noirup -v ${{ env.NOIR_VERSION }}
-      - run: nargo test e2e_
+      - run: nargo test e2e_ --test-threads 1
