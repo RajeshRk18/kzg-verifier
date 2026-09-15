@@ -1,5 +1,6 @@
 pub mod pairing;
 pub mod serde;
+mod tests;
 
 use bignum::BLS12_381_Fr;
 use bls12_381::pairings::{G1Affine, G2Affine};
