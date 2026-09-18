@@ -3,7 +3,7 @@
 // The relation e(C - y*G1 + x*pi, G2) * e(-pi, tau*G2) == 1 is asserted natively
 // in the generator before the bytes below are emitted.
 use crate::{assert_kzg, Fr, G1, VerifierKey, verify_kzg};
-use crate::serde::{fr_from_be_bytes, g1_from_be_bytes, g2_from_be_bytes, in_subgroup};
+use crate::serde::{fr_from_be_bytes, g1_from_be_bytes, g2_from_be_bytes, in_subgroup, validate_g1};
 use bignum::BigNum;
 use noir_bigcurve::{BigCurve, BLS12_381};
 
@@ -118,9 +118,9 @@ fn vector_points_are_in_subgroup() {
     assert(in_subgroup(proof()));
 }
 
-#[test(should_fail_with = "g1 point is not in the prime-order subgroup")]
+#[test(should_fail_with = "g1 point is not in the subgroup")]
 fn rejects_point_outside_subgroup() {
-    let _ = g1_from_be_bytes(
+    validate_g1(g1_from_be_bytes(
         [
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4,
@@ -130,13 +130,13 @@ fn rejects_point_outside_subgroup() {
             136, 201, 146, 107, 38, 218, 157, 216, 94, 146, 132, 131, 68, 99, 70, 184, 237, 0, 225,
             222, 93, 94, 169, 62, 53, 74, 190, 112, 108,
         ],
-    );
+    ));
 }
 
 #[test(should_fail)]
 fn rejects_off_curve_point() {
     // valid x, y taken from a different point: not a curve solution
-    let _ = g1_from_be_bytes(
+    validate_g1(g1_from_be_bytes(
         [
             11, 184, 208, 179, 40, 216, 1, 64, 164, 103, 56, 111, 224, 17, 245, 100, 139, 45, 57,
             159, 248, 210, 15, 16, 228, 145, 26, 108, 198, 239, 49, 63, 50, 152, 20, 15, 133, 37,
@@ -147,7 +147,7 @@ fn rejects_off_curve_point() {
             111, 236, 12, 159, 200, 221, 193, 22, 4, 222, 159, 7, 158, 133, 143, 6, 43, 118, 117,
             33, 84, 235, 145, 208, 39, 150, 136, 36, 163,
         ],
-    );
+    ));
 }
 
 #[test(should_fail_with = "value is not canonical: >= modulus")]

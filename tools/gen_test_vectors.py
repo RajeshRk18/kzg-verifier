@@ -53,11 +53,13 @@ def off_subgroup():
 Pbad = off_subgroup()
 bx, by = g1a(Pbad)
 
-print(f'''// Test vectors generated with py_ecc (independent implementation).
+print(f'''// Test vectors generated with py_ecc
+// Run `nargo fmt` after regenerating.
 // Polynomial f(X) = 4 + 7X + 13X^2 + 2X^3 committed under a fixed tau.
 // The relation e(C - y*G1 + x*pi, G2) * e(-pi, tau*G2) == 1 is asserted natively
 // in the generator before the bytes below are emitted.
-use crate::serde::{{fr_from_be_bytes, g1_from_be_bytes, g2_from_be_bytes, in_subgroup}};
+use bignum::BigNum;
+use crate::serde::{{fr_from_be_bytes, g1_from_be_bytes, g2_from_be_bytes, in_subgroup, validate_g1}};
 use crate::{{Fr, G1, VerifierKey, assert_kzg, verify_kzg}};
 use noir_bigcurve::{{BigCurve, BLS12_381}};
 
@@ -102,15 +104,15 @@ fn vector_points_are_in_subgroup() {{
     assert(in_subgroup(proof()));
 }}
 
-#[test(should_fail_with = "g1 point is not in the prime-order subgroup")]
+#[test(should_fail_with = "g1 point is not in the subgroup")]
 fn rejects_point_outside_subgroup() {{
-    let _ = g1_from_be_bytes({bx}, {by});
+    validate_g1(g1_from_be_bytes({bx}, {by}));
 }}
 
 #[test(should_fail)]
 fn rejects_off_curve_point() {{
     // valid x, y taken from a different point: not a curve solution
-    let _ = g1_from_be_bytes({cx}, {py});
+    validate_g1(g1_from_be_bytes({cx}, {py}));
 }}
 
 #[test(should_fail)]
