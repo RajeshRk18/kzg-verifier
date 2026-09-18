@@ -1,11 +1,9 @@
 use bls12_381::fp12::Fp12;
 use bls12_381::pairings::{G1Affine, G2Affine, miller_loop};
 
-/// Checks `e(a0, a1) * e(b0, b1) == 1`.
-///
-/// A pairing with an identity input contributes the multiplicative identity, so
-/// each term is guarded independently. `miller_loop` has no such guard of its own.
+/// Checks e(a0, a1) * e(b0, b1) == 1.
 pub fn two_pair_check(a0: G1Affine, a1: G2Affine, b0: G1Affine, b1: G2Affine) -> bool {
+    // TODO: Optimize the miller outputs by having the two pairings share per-round FP12 squaring
     let fa = if a0.infinity | a1.infinity {
         Fp12::one()
     } else {
@@ -17,8 +15,5 @@ pub fn two_pair_check(a0: G1Affine, a1: G2Affine, b0: G1Affine, b1: G2Affine) ->
         miller_loop(b0, b1)
     };
 
-    // ponytail: two independent Miller loops sharing one final exponentiation.
-    // A true two-pair loop would share the per-round Fp12 squaring (~62 squares);
-    // see findings.md P3 before optimising the pairing core.
     (fa * fb).final_exponentiation().eq(Fp12::one())
 }
