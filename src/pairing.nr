@@ -3,7 +3,7 @@ use bls12_381::pairings::{G1Affine, G2Affine, miller_loop};
 
 /// Checks e(a0, a1) * e(b0, b1) == 1.
 pub fn two_pair_check(a0: G1Affine, a1: G2Affine, b0: G1Affine, b1: G2Affine) -> bool {
-    // TODO: Optimize the miller outputs by having the two pairings share per-round FP12 squaring
+    // TODO: Optimize the miller outputs by having the two pairings share FP12 squaring
     let fa = if a0.infinity | a1.infinity {
         Fp12::one()
     } else {

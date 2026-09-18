@@ -55,7 +55,7 @@ constrains it so the result cannot be silently discarded.
 
 ## What is verified
 
-The textbook equation
+The equation
 
 ```
 e(C - y*G1, G2) == e(pi, tau*G2 - x*G2)
@@ -121,19 +121,9 @@ before emitting bytes.
 Per Miller loop: 63 doublings, 5 additions, 68 `ell`, 62 Fp12 squarings.
 Atomic costs: Fp2 mul 128, Fp12 square 1,552, Fp12 mul 2,148, `ell` 2,538.
 
-The library is a `lib` crate, so `nargo info` reports nothing on its own; a `bin`
-crate with a `main` is required to measure or to run Noir's constraint analysis.
 
-## Known gaps
+## Known gaps and issues
 
-- The pairing dependency is pinned to a branch, not a tag, because the upstream
-  repository publishes no tags. Fork and tag it before relying on this.
-- The two pairings run as separate Miller loops sharing one final exponentiation.
-  A true two-pair loop would share the per-round squaring (~98,000 ACIR).
-- `fp6::mul_interleaved` in the pairing dependency uses unconstrained values as
-  factors inside `evaluate_quadratic_expression`, so its result is not uniquely
-  determined by its inputs. This is inherited from upstream and is not fixed here.
-- Verification is expensive: one opening takes ~13 min and peaks near 6.6 GB on
-  an M-series laptop. Run the pairing tests with `--test-threads 1`; in parallel
-  they exhaust memory.
-- Only single openings are supported; no batching or multi-opening.
+- `fp6::mul_interleaved` in the pairing dependency uses unconstrained values as factors inside `evaluate_quadratic_expression`.
+- One opening verification takes ~13 min and peaks near 6.6 GB on my Macbook M4 Air. Run the pairing tests with `--test-threads 1` so it doesnt get OOM'd.
+- Only single openings are supported, no batching or multi-opening.
