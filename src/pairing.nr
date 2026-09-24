@@ -1,14 +1,19 @@
 use bls12_381::fp12::Fp12;
 use bls12_381::pairings::{G1Affine, G2Affine, miller_loop};
 
-// Optimized pairing from https://github.com/lambdaclass/lambdaworks/blob/2ce8b2ea2dd6547848b63db2246912b06066dd1b/math/src/elliptic_curve/short_weierstrass/curves/bls12_381/pairing.rs#L96
-pub(crate) fn pairing_batch(p: (G1Affine, G2Affine), q: (G1Affine, G2Affine)) -> Fp12 {
-    let mut res = Fp12::one();
+/// Checks e(a0, a1) * e(b0, b1) == 1.
+pub fn two_pair_check(a0: G1Affine, a1: G2Affine, b0: G1Affine, b1: G2Affine) -> bool {
+    // TODO: Optimize the miller outputs by having the two pairings share FP12 squaring
+    let fa = if a0.infinity | a1.infinity {
+        Fp12::one()
+    } else {
+        miller_loop(a0, a1)
+    };
+    let fb = if b0.infinity | b1.infinity {
+        Fp12::one()
+    } else {
+        miller_loop(b0, b1)
+    };
 
-    if !(p.0.infinity & p.1.infinity & q.0.infinity & q.1.infinity) {
-        let p_miller = miller_loop(p.0, p.1);
-        let q_miller = miller_loop(q.0, q.1);
-        res = p_miller.mul(q_miller).final_exponentiation();
-    }
-    res
+    (fa * fb).final_exponentiation().eq(Fp12::one())
 }

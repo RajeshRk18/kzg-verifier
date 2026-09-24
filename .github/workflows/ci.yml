@@ -1,0 +1,50 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+env:
+  NOIR_VERSION: 1.0.0-beta.24
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Noir
+        run: |
+          curl -L https://raw.githubusercontent.com/noir-lang/noirup/main/install | bash
+          echo "$HOME/.nargo/bin" >> "$GITHUB_PATH"
+      - run: noirup -v ${{ env.NOIR_VERSION }}
+      - run: nargo fmt --check
+      - run: nargo check
+      - name: Validation tests (no pairing)
+        run: |
+          nargo test generator_is_in_subgroup
+          nargo test identity_is_in_subgroup
+          nargo test vector_points_are_in_subgroup
+          nargo test rejects_point_outside_subgroup
+          nargo test rejects_off_curve_point
+          nargo test rejects_noncanonical_scalar
+      - name: Circuit size
+        run: nargo info
+
+  pairing:
+    # Two Miller loops per case. One case peaked at 6.6 GB and ~14 min locally;
+    # running them in parallel OOM-kills the runner, hence --test-threads 1.
+    # A standard 7 GB runner is marginal for this; use a larger one if it fails.
+    # Not a pull-request gate.
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 720
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Noir
+        run: |
+          curl -L https://raw.githubusercontent.com/noir-lang/noirup/main/install | bash
+          echo "$HOME/.nargo/bin" >> "$GITHUB_PATH"
+      - run: noirup -v ${{ env.NOIR_VERSION }}
+      - run: nargo test e2e_ --test-threads 1
