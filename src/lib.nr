@@ -39,7 +39,7 @@ fn to_affine(point: G1) -> G1Affine {
 
 /// Verifies that commitment opens to `y` at `x` and returns result.
 ///
-/// The textbook equation `e(C - y*G1, G2) == e(pi, tau*G2 - x*G2)` is rearranged
+/// The equation `e(C - y*G1, G2) == e(pi, tau*G2 - x*G2)` is rearranged
 /// by bilinearity into `e(C - y*G1 + x*pi, G2) * e(-pi, tau*G2) == 1`.
 /// With this rearranged equation, it moves the evaluation point onto G1 and removes all G2 scalar multiplication.
 pub fn verify_kzg(vk: VerifierKey, x: Fr, y: Fr, commitment: G1, proof: G1) -> bool {

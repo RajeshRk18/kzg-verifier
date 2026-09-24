@@ -127,3 +127,10 @@ Atomic costs: Fp2 mul 128, Fp12 square 1,552, Fp12 mul 2,148, `ell` 2,538.
 - `fp6::mul_interleaved` in the pairing dependency uses unconstrained values as factors inside `evaluate_quadratic_expression`.
 - One opening verification takes ~13 min and peaks near 6.6 GB on my Macbook M4 Air. Run the pairing tests with `--test-threads 1` so it doesnt get OOM'd.
 - Only single openings are supported, no batching or multi-opening.
+
+## References
+
+- [Novakovic and Eagen, *On Proving Pairings* (ePrint 2024/640)](https://eprint.iacr.org/2024/640)
+- [noir_bigcurve](https://github.com/noir-lang/noir_bigcurve) and [noir-bignum](https://github.com/noir-lang/noir-bignum)
+- [critesjosh/noir-bls-signature](https://github.com/critesjosh/noir-bls-signature)
+- [py_ecc](https://github.com/ethereum/py_ecc)

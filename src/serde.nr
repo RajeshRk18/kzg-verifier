@@ -4,13 +4,13 @@ use bls12_381::pairings::G2Affine;
 use noir_bigcurve::{BigCurve, BLS12_381, BLS12_381Scalar};
 use std::ops::Neg;
 
-/// BLS12-381 scalar field modulus `r`, big-endian.
+/// BLS12-381 scalar field modulus
 global R_BE: [u8; 32] = [
     115, 237, 167, 83, 41, 157, 125, 72, 51, 57, 216, 8, 9, 161, 216, 5, 83, 189, 164, 2, 255, 254,
     91, 254, 255, 255, 255, 255, 0, 0, 0, 1,
 ];
 
-/// BLS12-381 base field modulus `q`, big-endian.
+/// BLS12-381 base field modulus
 global Q_BE: [u8; 48] = [
     26, 1, 17, 234, 57, 127, 230, 154, 75, 27, 167, 182, 67, 75, 172, 215, 100, 119, 75, 132, 243,
     133, 18, 191, 103, 48, 210, 160, 246, 176, 246, 36, 30, 171, 255, 254, 177, 83, 255, 255, 185,
@@ -18,10 +18,6 @@ global Q_BE: [u8; 48] = [
 ];
 
 /// Asserts `bytes < modulus`, comparing big-endian.
-///
-/// bignum v0.10's `from_be_bytes` accepts values in `[modulus, 2^MOD_BITS)`
-/// (verified for `r`, `r + 1` and `2^255 - 1`), so canonicality is enforced here
-/// rather than assumed from the dependency.
 fn assert_canonical<let N: u32>(bytes: [u8; N], modulus: [u8; N]) {
     let mut less = false;
     let mut decided = false;
